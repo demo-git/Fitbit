@@ -1,0 +1,13 @@
+{
+  "name": "fabulator/fitbit",
+  "description": "Fitbit library",
+	"repositories": [{
+		"type": "vcs"
+	}],
+	"require": {
+		"PHP" : ">=5.2"
+	},
+	"autoload": {
+		"psr-0": { "Fitbit": "lib/" }
+	}
+}
