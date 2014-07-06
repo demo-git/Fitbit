@@ -62,7 +62,7 @@ class FitBit
 
         $this->consumer_key = $consumer_key;
         $this->consumer_secret = $consumer_secret;
-        $this->oauth = new OAuth($consumer_key, $consumer_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
+        $this->oauth = new \OAuth($consumer_key, $consumer_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
 
         $this->debug = $debug;
         if ($debug)
@@ -891,14 +891,14 @@ class FitBit
     public function deleteFood($id)
     {
         $headers = $this->getHeaders();
-
         try {
-            $this->oauth->fetch($this->baseApiUrl . "user/-/foods/log/" . $id . ".xml", null,
-                                OAUTH_HTTP_METHOD_DELETE, $headers);
+            $this->oauth->fetch($this->baseApiUrl . "user/-/foods/log/" . $id . "." . $this->responseFormat, null, OAUTH_HTTP_METHOD_DELETE, $headers);
         } catch (Exception $E) {
+
         }
 
         $responseInfo = $this->oauth->getLastResponseInfo();
+
         if (!strcmp($responseInfo['http_code'], '204')) {
             return true;
         } else {
@@ -2402,7 +2402,7 @@ class FitBit
  * Fitbit API communication exception
  *
  */
-class FitBitException extends Exception
+class FitBitException extends \Exception
 {
     public $fbMessage = '';
     public $httpcode;
