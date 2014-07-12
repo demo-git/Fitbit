@@ -22,12 +22,12 @@ class FitBitFood
 			'dietaryFiber' => array('val' => 0, 'unit' => 'g'),
 			'sugars' => array('val' => 0, 'unit' => 'g'),
 			'protein' => array('val' => 0, 'unit' => 'g'),
-			'vitaminA' => array('val' => 0, 'unit' => 'mg'),
+			'vitaminA' => array('val' => 0, 'unit' => 'IU'),
 			'vitaminB6' => array('val' => 0, 'unit' => 'mg'),
-			'vitaminB12' => array('val' => 0, 'unit' => 'mg'),
+			'vitaminB12' => array('val' => 0, 'unit' => 'μg'),
 			'vitaminC' => array('val' => 0, 'unit' => 'mg'),
-			'vitaminD' => array('val' => 0, 'unit' => 'mg'),
-			'vitaminE' => array('val' => 0, 'unit' => 'mg'),
+			'vitaminD' => array('val' => 0, 'unit' => 'IU'),
+			'vitaminE' => array('val' => 0, 'unit' => 'IU'),
 			'biotin' => array('val' => 0, 'unit' => 'mg'),
 			'folicAcid' => array('val' => 0, 'unit' => 'mg'),
 			'niacin' => array('val' => 0, 'unit' => 'mg'),
@@ -39,7 +39,7 @@ class FitBitFood
 			'iron' => array('val' => 0, 'unit' => 'mg'),
 			'magnesium' => array('val' => 0, 'unit' => 'mg'),
 			'phosphorus' => array('val' => 0, 'unit' => 'g'),
-			'iodine' => array('val' => 0, 'unit' => 'mg'),
+			'iodine' => array('val' => 0, 'unit' => 'μg'),
 			'zinc' => array('val' => 0, 'unit' => 'mg')
 			);
 		private $units;
@@ -68,7 +68,9 @@ class FitBitFood
     }
 
 		private function unitConvert($value, $from, $to){
-			if(!isset($this->units[$from])) return $value;
+			if($from == 'μg' && $to == 'IU') return $value*40;
+			elseif($from == 'ATE' && $to == 'IU') return $value/0.67;
+			elseif($from == 'RE' && $to == 'IU') return $value/0.33334;
 			return $value*($this->units[$from]/$this->units[$to]);
 		}
 
