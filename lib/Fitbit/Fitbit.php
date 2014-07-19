@@ -1361,6 +1361,32 @@ class FitBit
 				}
 		}
 
+		public function getWeight($date, $period = false)
+		{
+				$headers = $this->getHeaders();
+				$dateStr = $date->format('Y-m-d');
+				if($period){
+					$dateStr .= "/" . $period;
+				}
+				try {
+						$this->oauth->fetch($this->baseApiUrl . "user/" . $this->userId . "/body/log/weight/date/" . $dateStr . "." . $this->responseFormat,
+																null, OAUTH_HTTP_METHOD_GET, $headers);
+				} catch (Exception $E) {
+				}
+				$response = $this->oauth->getLastResponse();
+				$responseInfo = $this->oauth->getLastResponseInfo();
+				if (!strcmp($responseInfo['http_code'], '200')) {
+						$response = $this->parseResponse($response);
+
+						if ($response)
+								return $response;
+						else
+								throw new FitBitException($responseInfo['http_code'], 'Fitbit request failed. Code: ' . $responseInfo['http_code']);
+				} else {
+						throw new FitBitException($responseInfo['http_code'], 'Fitbit request failed. Code: ' . $responseInfo['http_code']);
+				}
+		}
+
 		/**
 		 * Log user body measurements
 		 *
