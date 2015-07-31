@@ -97,7 +97,7 @@ class FitBit
 		 * @param string $apiHost API host, i.e. api.fitbit.com (do you know any others?)
 		 * @param string $authHost Auth host, i.e. www.fitbit.com
 		 */
-		public function setEndpointBase($apiHost, $authHost, $https = true, $httpsApi = false)
+		public function setEndpointBase($apiHost, $authHost, $https = true, $httpsApi = true)
 		{
 				$this->apiHost = $apiHost;
 				$this->authHost = $authHost;
@@ -105,7 +105,7 @@ class FitBit
 				$this->initUrls($https, $httpsApi);
 		}
 
-		private function initUrls($https = true, $httpsApi = false)
+		private function initUrls($https = true, $httpsApi = true)
 		{
 
 				if ($httpsApi)
@@ -549,6 +549,7 @@ class FitBit
 
 				$response = $this->oauth->getLastResponse();
 				$responseInfo = $this->oauth->getLastResponseInfo();
+
 				if (!strcmp($responseInfo['http_code'], '201')) {
 						$response = $this->parseResponse($response);
 
