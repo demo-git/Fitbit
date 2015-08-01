@@ -519,7 +519,7 @@ class FitBit
 		 * @param string $distanceUnit Distance unit string (see http://wiki.fitbit.com/display/API/API-Distance-Unit)
 		 * @return mixed SimpleXMLElement or the value encoded in json as an object
 		 */
-		public function logActivity($date, $activityId, $duration, $calories = null, $distance = null, $distanceUnit = null, $activityName = null)
+		public function logActivity($date, $activityId, $duration, $calories = null, $distance = null, $distanceUnit = null, $activityName = null, $userActivityId = null)
 		{
 				$distanceUnits = array('Centimeter', 'Foot', 'Inch', 'Kilometer', 'Meter', 'Mile', 'Millimeter', 'Steps', 'Yards');
 
@@ -542,7 +542,7 @@ class FitBit
 						$parameters['distanceUnit'] = $distanceUnit;
 
 				try {
-						$this->oauth->fetch($this->baseApiUrl . "user/-/activities." . $this->responseFormat, $parameters,
+						$this->oauth->fetch($this->baseApiUrl . "user/-/activities". ($userActivityId ? "/". $userActivityId : '') ."." . $this->responseFormat, $parameters,
 																OAUTH_HTTP_METHOD_POST, $headers);
 				} catch (Exception $E) {
 				}
