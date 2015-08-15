@@ -1,5 +1,5 @@
 {
-  "name": "fabulator/Fitbit",
+  "name": "fabulator/fitbit",
   "description": "Fitbit library",
 	"repositories": [{
 		"type": "vcs"
