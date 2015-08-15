@@ -1,5 +1,5 @@
 <?php
-namespace Fitbit;
+namespace Fabulator;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
