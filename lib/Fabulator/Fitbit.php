@@ -15,6 +15,8 @@ class FitBit
     private $clientId;
     private $secret;
 
+    private $user = '-';
+
     public function __construct($clientId, $secret)
     {
         $this->clientId = $clientId;
@@ -130,6 +132,15 @@ class FitBit
     }
 
     /**
+     * Set Fitbit user, default is '-'
+     * @param string $user
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
+
+    /**
      * Send request to Fitbit API
      * @param  string $endpoint
      * @param  array $data
@@ -148,7 +159,7 @@ class FitBit
             $request = $this
                 ->http
                 ->$method(
-                    'user/-/' . $endpoint . '.json' . (($method == 'get') ? ('?' . http_build_query($data)) : ''),
+                    'user/'. $this->user .'/' . $endpoint . '.json' . (($method == 'get') ? ('?' . http_build_query($data)) : ''),
                     ['body' => $data]
                 );
         } catch (ClientException $e) {
