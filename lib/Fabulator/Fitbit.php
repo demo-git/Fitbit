@@ -196,8 +196,6 @@ class FitBit
      */
     public function addActivity($date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null, $logId = null)
     {
-
-        $headers = [];
         $parameters = [
             'date' => $date->format('Y-m-d'),
             'startTime' => $date->format('H:i'),
@@ -257,6 +255,91 @@ class FitBit
         }
 
         return $this->sendRequest("activities/list", $parameters, 'GET');
+    }
+
+
+    /**
+     * Get water log https://dev.fitbit.com/docs/food-logging/#get-water-logs
+     * @param  Datetime $date   date of log
+     * @return object
+     */
+    public function getWaterLog($date)
+    {
+
+        $parameters = [
+            'date' => $date->format('Y-m-d')
+        ];
+
+        return $this->sendRequest("foods/log/water/date", $parameters, 'GET');
+    }
+
+    /**
+     * Add new water log https://dev.fitbit.com/docs/food-logging/#log-water
+     * @param  Datetime $date   date of log
+     * @param  int $amount      amount of water
+     * @param  string $unit     unit
+     * @return object
+     */
+    public function logWater($date, $amount, $unit = 'ml')
+    {
+
+        $units = ['ml', 'fl oz', 'cup'];
+
+        $parameters = [
+            'date' => $date->format('Y-m-d'),
+            'amount' => $amount,
+            'unit' => $unit
+        ];
+
+        if (!in_array($unit, $units)) {
+            throw new Exception("Invalid unit. Only ml fl oz and cup are allowed");
+        }
+
+        return $this->sendRequest("foods/log/water", $parameters, 'POST');
+    }
+
+    /**
+     * Delete water log https://dev.fitbit.com/docs/food-logging/#delete-water-log
+     * @param  int $id   id of water log
+     * @return object
+     */
+    public function deleteWaterLog($id)
+    {
+        return $this->sendRequest("foods/log/water/" . $id, [], 'DELETE');
+    }
+
+    /**
+     * Delete all water logs from one day
+     * @param  Datetime     $date the day
+     */
+    public function deleteWaterLogForDay($date)
+    {
+        $logs = $this->getWaterLog($date);
+        if ($logs->water) {
+            foreach ($logs->water as $log) {
+                $this->deleteWaterLog($log->logId);
+            }
+        }
+    }
+
+    /**
+     * Get water goal https://dev.fitbit.com/docs/food-logging/#get-water-goal
+     * @param  float $goal   water daily goal
+     * @return object
+     */
+    public function getWaterGoal()
+    {
+        return $this->sendRequest("foods/log/water/goal", [], 'GET');
+    }
+
+    /**
+     * Set water goal https://dev.fitbit.com/docs/food-logging/#update-water-goal
+     * @param  float $goal   water daily goal
+     * @return object
+     */
+    public function setWaterGoal($goal)
+    {
+        return $this->sendRequest("foods/log/water/goal", ['target' => $goal], 'POST');
     }
 
     public function getProfile()
