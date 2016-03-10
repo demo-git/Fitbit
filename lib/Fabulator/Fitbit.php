@@ -365,3 +365,4 @@ class FitBit
         return $this->get('profile');
     }
 }
+

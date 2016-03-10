@@ -1,6 +1,8 @@
 <?php
 namespace Fabulator\Fitbit;
 
+use Fabulator\Fitbit;
+
 use \Datetime;
 use \Exception;
 
@@ -8,7 +10,7 @@ class Water
 {
     private $fitbit;
 
-    public function __construct($fitbit)
+    public function __construct(Fitbit $fitbit)
     {
         $this->fitbit = $fitbit;
     }
@@ -20,7 +22,7 @@ class Water
      */
     public function get(Datetime $date)
     {
-        return $fitbit->get(
+        return $this->fitbit->get(
             'foods/log/water/date',
             ['date' => $date->format('Y-m-d')]
         );
@@ -33,7 +35,7 @@ class Water
      * @param  string $unit     unit - ml fl oz and cup
      * @return object
      */
-    public function log($date, $amount, $unit = 'ml')
+    public function log(Datetime $date, $amount, $unit = 'ml')
     {
 
         $data = [
@@ -42,7 +44,7 @@ class Water
             'unit' => $unit
         ];
 
-        return $fitbit->post('foods/log/water', $data);
+        return $this->fitbit->post('foods/log/water', $data);
     }
 
     /**
@@ -52,7 +54,7 @@ class Water
      */
     public function delete($id)
     {
-        return $fitbit->delete('foods/log/water/' . $id);
+        return $this->fitbit->delete('foods/log/water/' . $id);
     }
 
     /**
@@ -76,17 +78,17 @@ class Water
      */
     public function getGoal()
     {
-        return $fitbit->get('foods/log/water/goal');
+        return $this->fitbit->get('foods/log/water/goal');
     }
 
     /**
      * Set water goal https://dev.fitbit.com/docs/food-logging/#update-water-goal
-     * @param  float $goal   water daily goal
+     * @param  integer $goal   water daily goal
      * @return object
      */
     public function setGoal($goal)
     {
-        return $fitbit->post(
+        return $this->fitbit->post(
             'foods/log/water/goal',
             ['target' => $goal]
         );
