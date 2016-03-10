@@ -1,19 +1,13 @@
 <?php
 namespace Fabulator\Fitbit;
 
-use Fabulator\Fitbit;
+use Fabulator\Fitbit\Module;
 
 use \Datetime;
 use \Exception;
 
-class Water
+class Water extends Module
 {
-    private $fitbit;
-
-    public function __construct(Fitbit $fitbit)
-    {
-        $this->fitbit = $fitbit;
-    }
 
     /**
      * Get water log https://dev.fitbit.com/docs/food-logging/#get-water-logs

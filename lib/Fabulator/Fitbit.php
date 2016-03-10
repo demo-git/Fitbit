@@ -2,6 +2,10 @@
 namespace Fabulator;
 
 use Fabulator\Fitbit\Water;
+use Fabulator\Fitbit\Activity;
+use Fabulator\Fitbit\Profile;
+use Fabulator\Fitbit\Body;
+use Fabulator\Fitbit\Hearth;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -19,6 +23,10 @@ class FitBit
     private $secret;
 
     public $water;
+    public $activity;
+    public $profile;
+    public $body;
+    public $hearth;
 
     private $user = '-';
 
@@ -27,6 +35,10 @@ class FitBit
         $this->clientId = $clientId;
         $this->secret = $secret;
         $this->water = new Water($this);
+        $this->activity = new Activity($this);
+        $this->profile = new Profile($this);
+        $this->body = new Body($this);
+        $this->hearth = new Hearth($this);
     }
 
     /**
@@ -177,7 +189,7 @@ class FitBit
      * @param  array   $data     data to send as GET parameter
      * @return object            fitbit response
      */
-    public function sendSimpleGet($endpoint, $data)
+    public function info($endpoint, $data)
     {
         return $this->get($endpoint, $data, false);
     }
@@ -224,145 +236,4 @@ class FitBit
         return json_decode($request->getBody()->getContents());
     }
 
-    /**
-     * Add new activity https://dev.fitbit.com/docs/activity/#log-activity
-     * @param  DateTime $date
-     * @param  string $activityTypeId
-     * @param  int $duration duration in sec
-     * @param  float $distance
-     * @param  int $calories
-     * @return object
-     */
-    public function addActivity($date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null, $logId = null)
-    {
-        $data = [
-            'date' => $date->format('Y-m-d'),
-            'startTime' => $date->format('H:i'),
-            'activityId' => $activityTypeId,
-            'durationMillis' => $duration
-        ];
-        if (isset($calories)) {
-            $data['manualCalories'] = (int) $calories;
-        }
-        if (isset($distance)) {
-            $data['distance'] = $distance;
-        }
-        if (isset($distanceUnit)) {
-            $data['distanceUnit'] = $distanceUnit;
-        }
-
-        return $this->post('activities' . ($logId ? '/'. $logId : ''), $data);
-    }
-
-    /**
-     * Edit existing activity https://dev.fitbit.com/docs/activity/#log-activity
-     * @param  string $logId ID of edited actitvity
-     * @param  DateTime $date
-     * @param  string $activityTypeId
-     * @param  int $duration duration in sec
-     * @param  float $distance distance in km
-     * @param  int $calories
-     * @return object
-     */
-    public function editActivity($logId, $date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null)
-    {
-        return $this->addActivity($date, $activityTypeId, $duration, $distance, $calories, $distanceUnit, $logId);
-    }
-
-    /**
-     * Delete Fitbit activity https://dev.fitbit.com/docs/activity/#delete-activity-log
-     * @param  string $logId
-     * @return object
-     */
-    public function deleteActivity($logId)
-    {
-        return $this->delete("activities/" . $logId);
-    }
-
-    /**
-     * Get Fitbit activity list https://dev.fitbit.com/docs/activity/#get-activity-logs-list
-     * @param  Datetime|null  $before
-     * @param  Datetime|null  $after
-     * @param  string  $sort
-     * @param  integer $limit
-     * @param  integer $offset
-     * @return object
-     */
-    public function getActivityList($before = null, $after = null, $sort = 'desc', $limit = 10, $offset = 0)
-    {
-        $data = [
-            'sort' => $sort,
-            'offset' => $offset,
-            'limit' => $limit
-        ];
-
-        if ($after) {
-            $data['afterDate'] = $after->format('Y-m-d') . 'T' . $after->format('H:i:s');
-        }
-
-        if ($before) {
-            $data['beforeDate'] = $before->format('Y-m-d') . 'T' . $before->format('H:i:s');
-        }
-
-        if (($after && $before) || (!$after && !$before)) {
-            throw new Exception('You have to specify only after date or only before date');
-        }
-
-        return $this->get('activities/list', $data);
-    }
-
-    /**
-     * List all activites in Fitbit https://dev.fitbit.com/docs/activity/#browse-activity-types
-     * @return object List of activities
-     */
-    public function browseActivity()
-    {
-        return $this->sendSimpleGet('activities');
-    }
-
-
-    /**
-     * HEARTH RATE TRACKING
-     */
-
-    /**
-     * Get time series of HR. Must be personal app.
-     * @param  Datetime $date        Day of hearth rate.
-     * @param  string   $detailLevel Detail level, could min sec or min
-     * @param  string   $startTime   Start time in HH:MM format
-     * @param  string   $endTime     End time in HH:MM format
-     * @return object                response from Fitbit
-     */
-    public function getDetailedHR(Datetime $date, $detailLevel = 'sec', $startTime = '00:00', $endTime = '23:39')
-    {
-        $data = [
-            'detail-level' => '1' . $detailLevel,
-            'start-time' => $startTime,
-            'end-time' => $endTime
-        ];
-
-        return $this->get('activities/heart/date/' . $date->format('Y-m-d') . '/1d', $data);
-    }
-
-    /**
-     * GET WEIGHT DATA
-     */
-
-    /**
-     * Get body time series https://dev.fitbit.com/docs/body/#body-time-series
-     * @param  string   $resource can be bmi, dat and weight
-     * @param  Datetime $from     from date
-     * @param  Datetime $to       to date
-     * @return object             response from Fitbit
-     */
-    public function getBodyTimeSeries($resource, Datetime $from, Datetime $to)
-    {
-        return $this->get('body/' . $resource . '/date/' . $from->format('Y-m-d') . '/' . $to->format('Y-m-d'));
-    }
-
-    public function getProfile()
-    {
-        return $this->get('profile');
-    }
 }
-
