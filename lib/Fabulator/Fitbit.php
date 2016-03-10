@@ -6,10 +6,12 @@ use Fabulator\Fitbit\Activity;
 use Fabulator\Fitbit\Profile;
 use Fabulator\Fitbit\Body;
 use Fabulator\Fitbit\Hearth;
+use Fabulator\Fitbit\Sleep;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use \Datetime;
+
+use \Exception;
 
 class FitBit
 {
@@ -27,6 +29,7 @@ class FitBit
     public $profile;
     public $body;
     public $hearth;
+    public $sleep;
 
     private $user = '-';
 
@@ -39,6 +42,7 @@ class FitBit
         $this->profile = new Profile($this);
         $this->body = new Body($this);
         $this->hearth = new Hearth($this);
+        $this->sleep = new Sleep($this);
     }
 
     /**
@@ -94,7 +98,7 @@ class FitBit
             );
         } catch (ClientException $e) {
             $errors = json_decode($e->getResponse()->getBody()->getContents());
-            throw new \Exception("Token request failed: " . $errors->errors[0]->message);
+            throw new Exception("Token request failed: " . $errors->errors[0]->message);
         }
         return json_decode($request->getBody()->getContents());
     }
@@ -230,7 +234,7 @@ class FitBit
             $request = $this->http->$method($url, $settings);
         } catch (ClientException $e) {
             $errors = json_decode($e->getResponse()->getBody()->getContents());
-            throw new \Exception("API call failed: " . $errors->errors[0]->message);
+            throw new Exception("API call failed: " . $errors->errors[0]->message);
         }
 
         return json_decode($request->getBody()->getContents());

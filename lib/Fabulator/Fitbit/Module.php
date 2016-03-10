@@ -5,7 +5,7 @@ use Fabulator\Fitbit;
 
 class Module
 {
-    private $fitbit;
+    public $fitbit;
 
     public function __construct(Fitbit $fitbit)
     {

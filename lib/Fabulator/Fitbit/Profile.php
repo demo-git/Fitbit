@@ -3,9 +3,6 @@ namespace Fabulator\Fitbit;
 
 use Fabulator\Fitbit\Module;
 
-use \Datetime;
-use \Exception;
-
 class Profile extends Module
 {
     /**
