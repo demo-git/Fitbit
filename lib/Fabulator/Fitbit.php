@@ -1,6 +1,8 @@
 <?php
 namespace Fabulator;
 
+use Fabulator\Fitbit\Water;
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use \Datetime;
@@ -16,12 +18,15 @@ class FitBit
     private $clientId;
     private $secret;
 
+    public $water;
+
     private $user = '-';
 
     public function __construct($clientId, $secret)
     {
         $this->clientId = $clientId;
         $this->secret = $secret;
+        $this->water = new Water($this);
     }
 
     /**
@@ -147,7 +152,7 @@ class FitBit
      * @param  array $data          data to send as POST
      * @return object               fitbit response
      */
-    public function sendPost($endpoint, $data)
+    public function post($endpoint, $data)
     {
         $url = 'user/'. $this->user .'/' . $endpoint . '.json';
         return $this->send($url, 'POST', $data);
@@ -160,7 +165,7 @@ class FitBit
      * @param  boolean $withUser send with info about user
      * @return object            fitbit response
      */
-    public function sendGet($endpoint, $data = [], $withUser = true)
+    public function get($endpoint, $data = [], $withUser = true)
     {
         $url = ($withUser ? 'user/'. $this->user .'/' : '') . $endpoint . '.json' . '?' . http_build_query($data);
         return $this->send($url, 'GET');
@@ -174,7 +179,7 @@ class FitBit
      */
     public function sendSimpleGet($endpoint, $data)
     {
-        return $this->sendGet($endpoint, $data, false);
+        return $this->get($endpoint, $data, false);
     }
 
     /**
@@ -182,7 +187,7 @@ class FitBit
      * @param  string  $endpoint Fitbit endpoint
      * @return object            fitbit response
      */
-    public function sendDelete($endpoint)
+    public function delete($endpoint)
     {
         $url = 'user/'. $this->user .'/' . $endpoint . '.json';
         return $this->send($url, 'DELETE');
@@ -246,7 +251,7 @@ class FitBit
             $data['distanceUnit'] = $distanceUnit;
         }
 
-        return $this->sendPost('activities' . ($logId ? '/'. $logId : ''), $data);
+        return $this->post('activities' . ($logId ? '/'. $logId : ''), $data);
     }
 
     /**
@@ -271,7 +276,7 @@ class FitBit
      */
     public function deleteActivity($logId)
     {
-        return $this->sendDelete("activities/" . $logId);
+        return $this->delete("activities/" . $logId);
     }
 
     /**
@@ -303,7 +308,7 @@ class FitBit
             throw new Exception('You have to specify only after date or only before date');
         }
 
-        return $this->sendGet('activities/list', $data);
+        return $this->get('activities/list', $data);
     }
 
     /**
@@ -315,88 +320,6 @@ class FitBit
         return $this->sendSimpleGet('activities');
     }
 
-    /**
-     * WATER LOGING
-     */
-
-    /**
-     * Get water log https://dev.fitbit.com/docs/food-logging/#get-water-logs
-     * @param  Datetime $date   date of log
-     * @return object
-     */
-    public function getWaterLog(Datetime $date)
-    {
-        return $this->sendGet("foods/log/water/date", ['date' => $date->format('Y-m-d')]);
-    }
-
-    /**
-     * Add new water log https://dev.fitbit.com/docs/food-logging/#log-water
-     * @param  Datetime $date   date of log
-     * @param  int $amount      amount of water
-     * @param  string $unit     unit
-     * @return object
-     */
-    public function logWater($date, $amount, $unit = 'ml')
-    {
-
-        $units = ['ml', 'fl oz', 'cup'];
-
-        $data = [
-            'date' => $date->format('Y-m-d'),
-            'amount' => $amount,
-            'unit' => $unit
-        ];
-
-        if (!in_array($unit, $units)) {
-            throw new Exception("Invalid unit. Only ml fl oz and cup are allowed");
-        }
-
-        return $this->sendPost("foods/log/water", $data);
-    }
-
-    /**
-     * Delete water log https://dev.fitbit.com/docs/food-logging/#delete-water-log
-     * @param  int $id   id of water log
-     * @return object
-     */
-    public function deleteWaterLog($id)
-    {
-        return $this->sendDelete("foods/log/water/" . $id);
-    }
-
-    /**
-     * Get water goal https://dev.fitbit.com/docs/food-logging/#get-water-goal
-     * @param  float $goal   water daily goal
-     * @return object
-     */
-    public function getWaterGoal()
-    {
-        return $this->sendGet("foods/log/water/goal");
-    }
-
-    /**
-     * Set water goal https://dev.fitbit.com/docs/food-logging/#update-water-goal
-     * @param  float $goal   water daily goal
-     * @return object
-     */
-    public function setWaterGoal($goal)
-    {
-        return $this->sendPost("foods/log/water/goal", ['target' => $goal]);
-    }
-
-    /**
-     * Delete all water logs from one day
-     * @param  Datetime     $date the day
-     */
-    public function deleteWaterLogForDay(Datetime $date)
-    {
-        $logs = $this->getWaterLog($date);
-        if ($logs->water) {
-            foreach ($logs->water as $log) {
-                $this->deleteWaterLog($log->logId);
-            }
-        }
-    }
 
     /**
      * HEARTH RATE TRACKING
@@ -418,11 +341,27 @@ class FitBit
             'end-time' => $endTime
         ];
 
-        return $this->sendGet('activities/heart/date/' . $date->format('Y-m-d') . '/1d', $data);
+        return $this->get('activities/heart/date/' . $date->format('Y-m-d') . '/1d', $data);
+    }
+
+    /**
+     * GET WEIGHT DATA
+     */
+
+    /**
+     * Get body time series https://dev.fitbit.com/docs/body/#body-time-series
+     * @param  string   $resource can be bmi, dat and weight
+     * @param  Datetime $from     from date
+     * @param  Datetime $to       to date
+     * @return object             response from Fitbit
+     */
+    public function getBodyTimeSeries($resource, Datetime $from, Datetime $to)
+    {
+        return $this->get('body/' . $resource . '/date/' . $from->format('Y-m-d') . '/' . $to->format('Y-m-d'));
     }
 
     public function getProfile()
     {
-        return $this->sendGet('profile');
+        return $this->get('profile');
     }
 }
