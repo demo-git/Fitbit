@@ -30,5 +30,9 @@ if ($_SESSION['fitbit']->dateExpire <= time()) {
 After you have token, you can use Fitbit endpoints.
 
 ```
-print_r($fitbit->getProfile());
+print_r($fitbit->profile->get());
+
+$fitbit->sleep->log(new \DateTime("2016-03-10 10:24"), 8 *60 * 60 * 1000);
+
+print_r($fitbit->water->get(new \DateTime("2016-03-10")));
 ```
