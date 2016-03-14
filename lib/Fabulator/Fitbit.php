@@ -11,18 +11,19 @@ use Fabulator\Fitbit\Sleep;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
-use \Exception;
-
 class FitBit
 {
 
     private $baseAPIUrl = 'https://api.fitbit.com/';
-    private $baseAPIVersion = '1';
     private $oauthUrl = 'https://www.fitbit.com/oauth2/';
+    private $baseAPIVersion = '1';
+    private $APIFormat = '.json';
 
-    private $http;
+    private $httpClient;
     private $clientId;
     private $secret;
+
+    private $token;
 
     public $water;
     public $activity;
@@ -58,10 +59,6 @@ class FitBit
     public function getLoginUrl($redirectUri, $scope, $responseType = 'code', $expiresIn = null, $prompt = 'none', $state = null)
     {
 
-        if ($responseType == 'code' && $expiresIn != null) {
-            throw new Exception("You can use expires in parameter only if response_type is token");
-        }
-
         $parameters = [
             'response_type' => $responseType,
             'client_id' => $this->clientId,
@@ -69,12 +66,15 @@ class FitBit
             'scope' => join(' ', $scope),
             'prompt' => $prompt
         ];
+
         if ($expiresIn != null) {
             $parameters['expires_in'] = $expiresIn;
         }
+
         if ($state != null) {
             $parameters['state'] = $state;
         }
+
         return $this->oauthUrl . 'authorize' . '?' . http_build_query($parameters);
     }
 
@@ -85,22 +85,14 @@ class FitBit
      */
     private function tokenRequest($parameters)
     {
-        $client = new Client();
-        try {
-            $request = $client->post(
-                $this->baseAPIUrl . 'oauth2/token?' . http_build_query($parameters),
-                [
-                'headers' => [
-                    'content-type' => 'application/x-www-form-urlencoded',
-                    'Authorization' => 'Basic '. base64_encode($this->clientId . ':' . $this->secret)
-                    ]
+        $url = $this->baseAPIUrl . 'oauth2/token?' . http_build_query($parameters);
+        $defaults = [
+            'headers' => [
+                'content-type' => 'application/x-www-form-urlencoded',
+                'Authorization' => 'Basic '. base64_encode($this->clientId . ':' . $this->secret)
                 ]
-            );
-        } catch (ClientException $e) {
-            $errors = json_decode($e->getResponse()->getBody()->getContents());
-            throw new Exception("Token request failed: " . $errors->errors[0]->message);
-        }
-        return json_decode($request->getBody()->getContents());
+        ];
+        return $this->send($url, 'POST', [], $defaults);
     }
 
     /**
@@ -141,16 +133,7 @@ class FitBit
      */
     public function setToken($token)
     {
-        $this->http = new Client(
-            [
-            'base_url' => $this->baseAPIUrl . $this->baseAPIVersion .'/',
-            'defaults' => [
-                'headers'  => [
-                        'Authorization' => 'Bearer ' . $token->access_token
-                    ]
-                ]
-            ]
-        );
+        $this->token = $token;
     }
 
     /**
@@ -170,8 +153,8 @@ class FitBit
      */
     public function post($endpoint, $data)
     {
-        $url = 'user/'. $this->user .'/' . $endpoint . '.json';
-        return $this->send($url, 'POST', $data);
+        $url = 'user/' . $this->user . '/' . $endpoint . $this->APIFormat;
+        return $this->sentToRestAPI($url, 'POST', $data);
     }
 
     /**
@@ -183,8 +166,9 @@ class FitBit
      */
     public function get($endpoint, $data = [], $withUser = true)
     {
-        $url = ($withUser ? 'user/'. $this->user .'/' : '') . $endpoint . '.json' . '?' . http_build_query($data);
-        return $this->send($url, 'GET');
+        $userPrefix = ($withUser ? 'user/'. $this->user .'/' : '');
+        $url = $userPrefix . $endpoint . $this->APIFormat . '?' . http_build_query($data);
+        return $this->sentToRestAPI($url, 'GET');
     }
 
     /**
@@ -205,22 +189,42 @@ class FitBit
      */
     public function delete($endpoint)
     {
-        $url = 'user/'. $this->user .'/' . $endpoint . '.json';
-        return $this->send($url, 'DELETE');
+        $url = 'user/' . $this->user . '/' . $endpoint . $this->APIFormat;
+        return $this->sentToRestAPI($url, 'DELETE');
+    }
+
+    /**
+     * Sent request to Fitbit REST API
+     * @param  [string] $url    endpoint
+     * @param  [string] $method http method
+     * @param  array  $data     sent data
+     * @return [object]         response from Fitbit
+     */
+    private function sentToRestAPI($url, $method, $data = [])
+    {
+        $url = $this->baseAPIUrl . $this->baseAPIVersion . '/' . $url;
+        $defaults = [
+            'headers'  => [
+                'Authorization' => 'Bearer ' . $this->token->access_token
+            ]
+        ];
+        return $this->send($url, $method, $data, $defaults);
     }
 
     /**
      * Do an API request
-     * @param  string $url    where to send
-     * @param  string $method method of request
-     * @param  array  $data   data to send in body
-     * @return object         fitbit response
+     * @param  string $url          where to send
+     * @param  string $method       method of request
+     * @param  array  $data         data to send in body
+     * @param  array  $defaults     http client set
+     * @return object               fitbit response
      */
-    public function send($url, $method, $data = [])
+    private function send($url, $method, $data = [], $defaults = [])
     {
-        if (!$this->http) {
-            throw new Exception("You did not set access token.");
-        }
+        $client = new Client([
+            'base_url' => $url,
+            'defaults' => $defaults
+        ]);
 
         $method = strtolower($method);
 
@@ -231,13 +235,12 @@ class FitBit
         }
 
         try {
-            $request = $this->http->$method($url, $settings);
+            $request = $client
+                ->$method($url, $settings);
         } catch (ClientException $e) {
-            $errors = json_decode($e->getResponse()->getBody()->getContents());
-            throw new Exception("API call failed: " . $errors->errors[0]->message);
+            throw new FitbitAPIException($e->getMessage(), $e->getRequest(), $e->getResponse(), $e->getPrevious());
         }
 
         return json_decode($request->getBody()->getContents());
     }
-
 }
