@@ -24,6 +24,16 @@ class Activity extends Module
     }
 
     /**
+     * Get info about single activity (i did not found documentation)
+     * @param  string $logId activity log id
+     * @return object
+     */
+    public function get($logId)
+    {
+        return $this->fitbit->get('activities/' . $logId);
+    }
+
+    /**
      * Add new activity https://dev.fitbit.com/docs/activity/#log-activity
      * @param  DateTime $date
      * @param  string $activityTypeId
@@ -33,7 +43,7 @@ class Activity extends Module
      * @param  string $distanceUnit name of unit
      * @return object
      */
-    private function edit($date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null, $logId = null)
+    public function edit($date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null, $logId = null)
     {
         $data = [
             'date' => $date->format('Y-m-d'),
