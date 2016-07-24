@@ -42,7 +42,7 @@ class FitBit
         $this->activity = new Activity($this);
         $this->profile = new Profile($this);
         $this->body = new Body($this);
-        $this->hearth = new Hearth($this);
+        $this->heart = new Heart($this);
         $this->sleep = new Sleep($this);
     }
 
