@@ -5,7 +5,7 @@ use Fabulator\Fitbit\Water;
 use Fabulator\Fitbit\Activity;
 use Fabulator\Fitbit\Profile;
 use Fabulator\Fitbit\Body;
-use Fabulator\Fitbit\Hearth;
+use Fabulator\Fitbit\Heart;
 use Fabulator\Fitbit\Sleep;
 
 use GuzzleHttp\Client;
