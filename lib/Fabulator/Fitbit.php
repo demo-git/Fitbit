@@ -226,6 +226,8 @@ class FitBit
             'defaults' => $defaults
         ]);
 
+        $client->setDefaultOption('verify', false);
+
         $method = strtolower($method);
 
         $settings = [];
