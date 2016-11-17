@@ -2,7 +2,7 @@
 	"name": "fabulator/fitbit",
 	"description": "Fitbit REST API library",
 	"type": "library",
-	"homepage": "https://github.com/demoFitbit/Fitbit",
+	"homepage": "https://github.com/demo-git/Fitbit",
 	"repositories": [{
 		"type": "vcs"
 	}],
