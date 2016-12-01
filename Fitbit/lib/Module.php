@@ -1,8 +1,8 @@
 <?php
 
-namespace Demo\Fitbit;
+namespace Fitbit\lib;
 
-use Demo\FitBit;
+use Fitbit\FitBit;
 
 class Module
 {

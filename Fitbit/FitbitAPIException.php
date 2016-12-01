@@ -1,6 +1,6 @@
 <?php
 
-namespace Demo;
+namespace Fitbit;
 
 use GuzzleHttp\Exception\ClientException;
 

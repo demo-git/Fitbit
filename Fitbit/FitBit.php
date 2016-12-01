@@ -1,13 +1,12 @@
 <?php
-namespace Demo;
+namespace Fitbit;
 
-use Demo\Fitbit\Water;
-use Demo\Fitbit\Activity;
-use Demo\Fitbit\Profile;
-use Demo\Fitbit\Body;
-use Demo\Fitbit\Heart;
-use Demo\Fitbit\Sleep;
-
+use Fitbit\lib\Activity;
+use Fitbit\lib\Body;
+use Fitbit\lib\Heart;
+use Fitbit\lib\Profile;
+use Fitbit\lib\Sleep;
+use Fitbit\lib\Water;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 

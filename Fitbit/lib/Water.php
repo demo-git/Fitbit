@@ -1,6 +1,6 @@
 <?php
 
-namespace Demo\Fitbit;
+namespace Fitbit\lib;
 
 class Water extends Module
 {
