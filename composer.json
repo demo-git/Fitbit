@@ -1,6 +1,7 @@
 {
 	"name": "demo-git/fitbit",
 	"description": "Fitbit REST API library",
+	"keywords": ["fitbit"],
 	"type": "library",
 	"homepage": "https://github.com/demo-git/Fitbit",
 	"repositories": [{
