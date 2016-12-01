@@ -1,16 +1,13 @@
 <?php
-namespace Fabulator\Fitbit;
 
-use Fabulator\Fitbit\Module;
-
-use \Datetime;
+namespace Demo\Fitbit;
 
 class Activity extends Module
 {
 
     /**
      * Add new activity https://dev.fitbit.com/docs/activity/#log-activity
-     * @param  DateTime $date
+     * @param  \DateTime $date
      * @param  string $activityTypeId
      * @param  int $duration duration in sec
      * @param  float $distance
@@ -18,7 +15,7 @@ class Activity extends Module
      * @param  string $distanceUnit name of unit
      * @return object
      */
-    public function log(Datetime $date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null)
+    public function log(\DateTime $date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null)
     {
         return $this->edit($date, $activityTypeId, $duration, $distance, $calories, $distanceUnit, null);
     }
@@ -35,12 +32,13 @@ class Activity extends Module
 
     /**
      * Add new activity https://dev.fitbit.com/docs/activity/#log-activity
-     * @param  DateTime $date
+     * @param  \DateTime $date
      * @param  string $activityTypeId
      * @param  int $duration duration in sec
      * @param  float $distance
      * @param  int $calories
      * @param  string $distanceUnit name of unit
+     * @param  int $logId
      * @return object
      */
     public function edit($date, $activityTypeId, $duration, $distance = null, $calories = null, $distanceUnit = null, $logId = null)
@@ -79,8 +77,8 @@ class Activity extends Module
 
     /**
      * Get Fitbit activity list https://dev.fitbit.com/docs/activity/#get-activity-logs-list
-     * @param  Datetime|null  $before
-     * @param  Datetime|null  $after
+     * @param  \Datetime|null  $before
+     * @param  \Datetime|null  $after
      * @param  string  $sort
      * @param  integer $limit
      * @param  integer $offset
@@ -104,15 +102,5 @@ class Activity extends Module
 
         return $this->fitbit->get('activities/list', $data);
     }
-
-    /**
-     * List all activites in Fitbit https://dev.fitbit.com/docs/activity/#browse-activity-types
-     * @return object List of activities
-     */
-    public function browse()
-    {
-        return $this->info('activities');
-    }
-
 
 }

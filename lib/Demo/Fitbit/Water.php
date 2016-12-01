@@ -1,19 +1,16 @@
 <?php
-namespace Fabulator\Fitbit;
 
-use Fabulator\Fitbit\Module;
-
-use \Datetime;
+namespace Demo\Fitbit;
 
 class Water extends Module
 {
 
     /**
      * Get water log https://dev.fitbit.com/docs/food-logging/#get-water-logs
-     * @param  Datetime $date   date of log
+     * @param  \DateTime $date   date of log
      * @return object
      */
-    public function get(Datetime $date)
+    public function get(\DateTime $date)
     {
         return $this->fitbit->get(
             'foods/log/water/date',
@@ -23,12 +20,12 @@ class Water extends Module
 
     /**
      * Add new water log https://dev.fitbit.com/docs/food-logging/#log-water
-     * @param  Datetime $date   date of log
+     * @param  \DateTime $date   date of log
      * @param  int $amount      amount of water
      * @param  string $unit     unit - ml fl oz and cup
      * @return object
      */
-    public function log(Datetime $date, $amount, $unit = 'ml')
+    public function log(\DateTime $date, $amount, $unit = 'ml')
     {
 
         $data = [
@@ -52,9 +49,9 @@ class Water extends Module
 
     /**
      * Delete all water logs from one day
-     * @param  Datetime     $date the day
+     * @param  \DateTime     $date the day
      */
-    public function deleteForDay(Datetime $date)
+    public function deleteForDay(\DateTime $date)
     {
         $logs = $this->get($date);
         if ($logs->water) {
@@ -66,7 +63,6 @@ class Water extends Module
 
     /**
      * Get water goal https://dev.fitbit.com/docs/food-logging/#get-water-goal
-     * @param  float $goal   water daily goal
      * @return object
      */
     public function getGoal()

@@ -1,12 +1,12 @@
 <?php
-namespace Fabulator;
+namespace Demo;
 
-use Fabulator\Fitbit\Water;
-use Fabulator\Fitbit\Activity;
-use Fabulator\Fitbit\Profile;
-use Fabulator\Fitbit\Body;
-use Fabulator\Fitbit\Heart;
-use Fabulator\Fitbit\Sleep;
+use Demo\Fitbit\Water;
+use Demo\Fitbit\Activity;
+use Demo\Fitbit\Profile;
+use Demo\Fitbit\Body;
+use Demo\Fitbit\Heart;
+use Demo\Fitbit\Sleep;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -19,7 +19,6 @@ class FitBit
     private $baseAPIVersion = '1';
     private $APIFormat = '.json';
 
-    private $httpClient;
     private $clientId;
     private $secret;
 
@@ -81,9 +80,10 @@ class FitBit
     /**
      * Request access token from fitbit
      * @param  array $parameters
+     * @param  bool $ssl
      * @return object
      */
-    private function tokenRequest($parameters)
+    private function tokenRequest($parameters, $ssl = false)
     {
         $url = $this->baseAPIUrl . 'oauth2/token?' . http_build_query($parameters);
         $defaults = [
@@ -92,30 +92,33 @@ class FitBit
                 'Authorization' => 'Basic '. base64_encode($this->clientId . ':' . $this->secret)
                 ]
         ];
-        return $this->send($url, 'POST', [], $defaults);
+        return $this->send($url, 'POST', [], $defaults, $ssl);
     }
 
     /**
      * Refresh old access token
      * @param  object $token
+     * @param  bool   $ssl
      * @return object
      */
-    public function refreshToken($token)
+    public function refreshToken($token, $ssl = false)
     {
         $parameters = [
             'grant_type' => 'refresh_token',
             'refresh_token' => $token->refresh_token
         ];
 
-        return $this->tokenRequest($parameters);
+        return $this->tokenRequest($parameters, $ssl);
     }
 
     /**
      * Get new access token
      * @param  string $code
+     * @param  string $redirect_uri
+     * @param  bool   $ssl
      * @return object
      */
-    public function getToken($code, $redirect_uri)
+    public function getToken($code, $redirect_uri, $ssl = false)
     {
         $parameters = [
             'code' => $code,
@@ -124,7 +127,7 @@ class FitBit
             'redirect_uri' => $redirect_uri
         ];
 
-        return $this->tokenRequest($parameters);
+        return $this->tokenRequest($parameters, $ssl);
     }
 
     /**
@@ -149,12 +152,13 @@ class FitBit
      * Send simple post
      * @param  string $endpoint     Fitbit endpoint
      * @param  array $data          data to send as POST
+     * @param  bool   $ssl
      * @return object               fitbit response
      */
-    public function post($endpoint, $data)
+    public function post($endpoint, $data, $ssl = false)
     {
         $url = 'user/' . $this->user . '/' . $endpoint . $this->APIFormat;
-        return $this->sentToRestAPI($url, 'POST', $data);
+        return $this->sentToRestAPI($url, 'POST', $data, $ssl);
     }
 
     /**
@@ -162,13 +166,14 @@ class FitBit
      * @param  string  $endpoint Fitbit endpoint
      * @param  array   $data     data to send as GET parameter
      * @param  boolean $withUser send with info about user
+     * @param  bool   $ssl
      * @return object            fitbit response
      */
-    public function get($endpoint, $data = [], $withUser = true)
+    public function get($endpoint, $data = [], $withUser = true, $ssl = false)
     {
         $userPrefix = ($withUser ? 'user/'. $this->user .'/' : '');
         $url = $userPrefix . $endpoint . $this->APIFormat . '?' . http_build_query($data);
-        return $this->sentToRestAPI($url, 'GET');
+        return $this->sentToRestAPI($url, 'GET', [], $ssl);
     }
 
     /**
@@ -185,12 +190,13 @@ class FitBit
     /**
      * Send delete request
      * @param  string  $endpoint Fitbit endpoint
+     * @param  bool   $ssl
      * @return object            fitbit response
      */
-    public function delete($endpoint)
+    public function delete($endpoint, $ssl = false)
     {
         $url = 'user/' . $this->user . '/' . $endpoint . $this->APIFormat;
-        return $this->sentToRestAPI($url, 'DELETE');
+        return $this->sentToRestAPI($url, 'DELETE', [], $ssl);
     }
 
     /**
@@ -198,9 +204,10 @@ class FitBit
      * @param  [string] $url    endpoint
      * @param  [string] $method http method
      * @param  array  $data     sent data
-     * @return [object]         response from Fitbit
+     * @param  bool $ssl
+     * @return object         response from Fitbit
      */
-    private function sentToRestAPI($url, $method, $data = [])
+    private function sentToRestAPI($url, $method, $data = [], $ssl = false)
     {
         $url = $this->baseAPIUrl . $this->baseAPIVersion . '/' . $url;
         $defaults = [
@@ -208,7 +215,7 @@ class FitBit
                 'Authorization' => 'Bearer ' . $this->token->access_token
             ]
         ];
-        return $this->send($url, $method, $data, $defaults);
+        return $this->send($url, $method, $data, $defaults, $ssl);
     }
 
     /**
@@ -217,16 +224,19 @@ class FitBit
      * @param  string $method       method of request
      * @param  array  $data         data to send in body
      * @param  array  $defaults     http client set
+     * @param  bool   $ssl
      * @return object               fitbit response
      */
-    private function send($url, $method, $data = [], $defaults = [])
+    private function send($url, $method, $data = [], $defaults = [], $ssl = false)
     {
         $client = new Client([
             'base_url' => $url,
             'defaults' => $defaults
         ]);
 
-        $client->setDefaultOption('verify', false);
+        if (!$ssl) {
+            $client->setDefaultOption('verify', false);
+        }
 
         $method = strtolower($method);
 

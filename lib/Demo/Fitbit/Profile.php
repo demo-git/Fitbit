@@ -1,7 +1,6 @@
 <?php
-namespace Fabulator\Fitbit;
 
-use Fabulator\Fitbit\Module;
+namespace Demo\Fitbit;
 
 class Profile extends Module
 {

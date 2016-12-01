@@ -1,6 +1,6 @@
 <?php
 
-namespace Fabulator;
+namespace Demo;
 
 use GuzzleHttp\Exception\ClientException;
 
@@ -21,7 +21,7 @@ class FitbitAPIException extends ClientException
 
     /**
      * Get Fitbit body response
-     * @return [object]     response object
+     * @return Object  response object
      */
     public function getFitbitResponse()
     {
@@ -30,7 +30,7 @@ class FitbitAPIException extends ClientException
 
     /**
      * Get array of messages
-     * @return [array]  error messages
+     * @return array  error messages
      */
     public function getMessages()
     {
@@ -43,7 +43,7 @@ class FitbitAPIException extends ClientException
 
     /**
      * Error codes
-     * @return [array]  get array of error codes
+     * @return array  get array of error codes
      */
     public function getCodes()
     {

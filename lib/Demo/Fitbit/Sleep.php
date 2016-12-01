@@ -1,30 +1,27 @@
 <?php
-namespace Fabulator\Fitbit;
 
-use Fabulator\Fitbit\Module;
-
-use \Datetime;
+namespace Demo\Fitbit;
 
 class Sleep extends Module
 {
 
     /**
      * Get sleep log https://dev.fitbit.com/docs/sleep/#get-sleep-logs
-     * @param  Datetime $date for date
+     * @param  \DateTime $date for date
      * @return object         fitbit response
      */
-    public function get(Datetime $date)
+    public function get(\DateTime $date)
     {
         return $this->fitbit->get('sleep/date/' . $date->format('Y-m-d'));
     }
 
     /**
      * Log sleep https://dev.fitbit.com/docs/sleep/#log-sleep
-     * @param  Datetime $start    start of sleep
+     * @param  \DateTime $start    start of sleep
      * @param  int      $duration duration in miliseconds
      * @return object             Fitbit response
      */
-    public function log(Datetime $start, $duration)
+    public function log(\DateTime $start, $duration)
     {
         return $this->fitbit->post('sleep', [
                 'startTime' => $start->format('H:i'),
@@ -46,11 +43,11 @@ class Sleep extends Module
     /**
      * Get sleeping time series https://dev.fitbit.com/docs/sleep/#sleep-time-series
      * @param  string   $type  startTime, timeInBed, minutesAsleep, awakeningsCount, minutesAwake, minutesToFallAsleep, minutesAfterWakeup, efficiency
-     * @param  Datetime $start start of time series
-     * @param  Datetime $end   end of time series
+     * @param  \DateTime $start start of time series
+     * @param  \DateTime $end   end of time series
      * @return object          fitbit response
      */
-    public function getTimeSeries($type, Datetime $start, Datetime $end)
+    public function getTimeSeries($type, \DateTime $start, \DateTime $end)
     {
         return $this->fitbit->get('sleep/' . $type . '/date/' . $start->format('Y-m-d') . '/' . $end->format('Y-m-d'));
     }
@@ -67,6 +64,7 @@ class Sleep extends Module
     /**
      * Set fitbit sleeping goal https://dev.fitbit.com/docs/sleep/#update-sleep-goal
      * @param int $minDuration number of minutes
+     * @return Object fitbit response
      */
     public function setGoal($minDuration)
     {
